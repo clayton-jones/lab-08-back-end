@@ -8,6 +8,9 @@ const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
 
+const pg = require('pg');
+const client = new pg.Client(process.env.DATABASE_URL);
+
 //Application Setup
 const PORT = process.env.PORT;
 const app = express();
@@ -106,5 +109,13 @@ function errorHandler (error, request, response) {
   response.status(500).send(error);
 }
 
+client.connect()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server up on port ${PORT}`));
+  })
+  .catch(err => {
+    console.log('pg connect error ', err);
+  });
 
-app.listen(PORT, () => console.log(`Server up on port ${PORT}`));
+
+

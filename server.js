@@ -49,13 +49,49 @@ function Event (event) {
 function locationHandler(request, response) {
   try {
     const city = request.query.city;
-    let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json&limit-1`;
-    superagent.get(url)
+    console.log('city:', city);
+    let SQL = 'SELECT search_query, formatted_query, latitude, longitude FROM cities WHERE search_query=$1;';
+    // let SQLall = 'SELECT * FROM cities;';
+    // console.log('client.query(SQLall):', client.query(SQLall));
+    // console.log('Before if: ', client.query(SQL, [city]).rows[0]);
+    // console.log('client query:', client.query(SQL,[city]));
+    client.query(SQL, [city])
       .then(data => {
-        const geoData = data.body[0];
-        const locationData = new Location(city, geoData);
-        response.send(locationData);
+        if (data.rowCount) {
+          // console.log('data:', data);
+          console.log('Inside if => data: ', data.rows[0]);
+          response.send(data.rows[0]);
+        } else {
+          console.log('inside else');
+          let url = `https://us1.locationiq.com/v1/search.php?key=${process.env.GEOCODE_API_KEY}&q=${city}&format=json&limit-1`;
+          superagent.get(url)
+            .then(data => {
+              const geoData = data.body[0];
+              const locationData = new Location(city, geoData);
+              let sq = locationData.search_query;
+              let fq = locationData.formatted_query;
+              let lat = locationData.latitude;
+              let lon = locationData.longitude;
+              let SQLarray = [sq, fq, lat, lon];
+              let SQL = 'INSERT INTO cities (search_query, formatted_query, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *;';
+              client.query(SQL, SQLarray);
+              // .then(results => {
+              //   console.log('results:', results.rows[0]);
+              //   response.send(results.rows[0]);
+              // });
+
+              // client.query(`INSERT INTO cities
+              //               (search_query, formatted_query, latitude, longitude)
+              //               VALUES (${locationData.search_query}, ${locationData.formatted_query},
+              //               ${locationData.latitude}, ${locationData.longitude});`);
+              console.log('After adding to DB');
+              console.log('LocationData ', locationData);
+              response.send(locationData);
+            });
+        }
       });
+
+
   }
   catch(error) {
     errorHandler(error, request, response);
@@ -87,6 +123,7 @@ function eventsHandler(request, response) {
   try {
     const lat = request.query.latitude;
     const lon = request.query.longitude;
+    console.log('lat & lon', lat, lon);
     const url = `http://api.eventful.com/json/events/search?app_key=${process.env.EVENTFUL_API_KEY}&location=${lat},${lon}&within=10&page_size=20&date=Future`;
     superagent.get(url)
       .then(data => {

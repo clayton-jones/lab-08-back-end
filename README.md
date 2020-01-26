@@ -142,3 +142,15 @@ Start time: 2:00 pm
 Finish time: 2:27 pm
 
 Actual time needed to complete: 27 min
+
+
+Number and name of feature: #2 Server
+
+Estimate of time needed to complete: 60 min
+
+Start time: 2:30 pm
+
+Finish time: 5:30 pm
+
+Actual time needed to complete: 3 hrs
+

@@ -8,7 +8,7 @@ CREATE TABLE cities (
   longitude DECIMAL
 );
 
-INSERT INTO cities
-(search_query, formatted_query, latitude, longitude)
-VALUES ('portland', 'Portland, OR Test', 45.5051, 122.6750);
+-- INSERT INTO cities
+-- (search_query, formatted_query, latitude, longitude)
+-- VALUES ('portland', 'Portland, OR Test', 45.5051, 122.6750);
 
